@@ -1,43 +1,26 @@
-HELP.md
-
 # Maven
 target/
-.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
-# Gradle
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-# Environment files (IMPORTANT)
-.env
-.env.*
-*.env
 
 # Logs
 *.log
 
-# IDEs
-.idea
-*.iws
-*.iml
-*.ipr
-.classpath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-# NetBeans
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
 # OS
 .DS_Store
-Thumbs.db
+
+# IDEs
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.sts4-cache/
+
+# Node
+node_modules/
+dist/
+
+# Env files
+.env
 

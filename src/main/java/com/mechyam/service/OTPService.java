@@ -1,31 +1,45 @@
 package com.mechyam.service;
 
-import java.time.Duration;
-import java.util.Random;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class OTPService {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
-    public OTPService(RedisTemplate<String, String> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${app.otp.expiry-minutes:10}")
+    private int otpExpiryMinutes;
+
+    @Value("${app.otp.length:6}")
+    private int otpLength;
+
+    private static final String OTP_PREFIX = "OTP:";
 
     // =============================
-    // Generate & Store OTP
+    // Generate & Send OTP
     // =============================
     public String generateOTP(String email) {
-        String otp = String.valueOf(100000 + new Random().nextInt(900000));
+        String otp = generateRandomOTP();
+        String key = OTP_PREFIX + email;
 
         redisTemplate.opsForValue().set(
-                "OTP:" + email,
+                key,
                 otp,
-                Duration.ofMinutes(10)
+                otpExpiryMinutes,
+                TimeUnit.MINUTES
         );
+
+        emailService.sendOTPEmail(email, otp);
 
         return otp;
     }
@@ -34,19 +48,33 @@ public class OTPService {
     // Validate OTP
     // =============================
     public boolean validateOTP(String email, String otp) {
-        String key = "OTP:" + email;
+        String key = OTP_PREFIX + email;
         String storedOtp = redisTemplate.opsForValue().get(key);
 
         if (storedOtp == null) {
             return false;
         }
 
-        boolean isValid = storedOtp.equals(otp);
-
-        if (isValid) {
-            redisTemplate.delete(key);
+        if (storedOtp.equals(otp)) {
+            redisTemplate.delete(key); // one-time OTP
+            return true;
         }
 
-        return isValid;
+        return false;
+    }
+
+    // =============================
+    // Helpers
+    // =============================
+    private String generateRandomOTP() {
+        Random random = new Random();
+        StringBuilder otp = new StringBuilder();
+
+        for (int i = 0; i < otpLength; i++) {
+            otp.append(random.nextInt(10));
+        }
+
+        return otp.toString();
     }
 }
+

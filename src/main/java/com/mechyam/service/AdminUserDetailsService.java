@@ -4,11 +4,8 @@ import com.mechyam.entity.Admin;
 import com.mechyam.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -20,40 +17,27 @@ public class AdminUserDetailsService implements UserDetailsService {
     private AdminRepository adminRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
 
-    /**
-     * Used by Spring Security internally
-     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
         Admin admin = adminRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Admin user not found with email: " + email)
-                );
+                        new UsernameNotFoundException("Admin not found: " + email));
 
         return new User(
                 admin.getEmail(),
-                admin.getPassword(), // BCrypt hash from DB
+                admin.getPassword(),
                 Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_" + admin.getRole())
                 )
         );
     }
 
-    /**
-     * Used by your AdminAuthController for login validation
-     */
     public boolean validateAdminCredentials(String email, String rawPassword) {
-
         Admin admin = adminRepository.findByEmail(email).orElse(null);
+        if (admin == null) return false;
 
-        if (admin == null) {
-            return false;
-        }
-
-        // BCrypt password comparison
         return passwordEncoder.matches(rawPassword, admin.getPassword());
     }
 }

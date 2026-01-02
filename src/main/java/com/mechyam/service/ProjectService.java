@@ -81,6 +81,9 @@ import java.util.Map;
 //import java.io.IOException;
 //import java.util.List;
 //import java.util.Map;
+//import org.springframework.context.annotation.Profile;
+
+//@Profile("cloudinary")
 
 @Service
 public class ProjectService {

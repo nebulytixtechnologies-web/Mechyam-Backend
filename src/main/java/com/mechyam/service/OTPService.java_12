@@ -1,0 +1,105 @@
+package com.mechyam.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+@Service
+public class OTPService {
+    
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+    
+    @Autowired
+    private EmailService emailService;
+    
+    @Value("${app.otp.expiry-minutes:5}")
+    private int otpExpiryMinutes;
+    
+    @Value("${app.otp.length:6}")
+    private int otpLength;
+    
+    private static final String OTP_PREFIX = "otp:";
+    
+    public String generateOTP(String email) {
+        String otp = generateRandomOTP();
+        
+        // Store OTP in Redis with expiration
+        String key = OTP_PREFIX + email;
+        redisTemplate.opsForValue().set(key, otp, otpExpiryMinutes, TimeUnit.MINUTES);
+        
+        // Send OTP via email
+        emailService.sendOTPEmail(email, otp);
+        
+        System.out.println("=== OTP GENERATED ===");
+        System.out.println("Email: " + email);
+        System.out.println("OTP: " + otp);
+        System.out.println("Key: " + key);
+        System.out.println("Expiry: " + otpExpiryMinutes + " minutes");
+        
+        return otp;
+    }
+    
+    
+    
+    
+    public boolean validateOTP(String email, String otp) {
+        String key = OTP_PREFIX + email;
+        String storedOTP = redisTemplate.opsForValue().get(key);
+        
+        System.out.println("=== OTP VALIDATION ===");
+        System.out.println("Email: " + email);
+        System.out.println("Input OTP: " + otp);
+        System.out.println("Stored OTP: " + storedOTP);
+        System.out.println("Key: " + key);
+        
+        if (storedOTP == null) {
+            System.out.println("OTP not found or expired in Redis");
+            return false;
+        }
+        
+        if (storedOTP.equals(otp)) {
+            System.out.println("OTP validation SUCCESS");
+            // OTP validated successfully, delete it from Redis
+            redisTemplate.delete(key);
+            return true;
+        }
+        
+        System.out.println("OTP validation FAILED - mismatch");
+        return false;
+    }
+    
+    public boolean isOTPExpired(String email) {
+        String key = OTP_PREFIX + email;
+        String storedOTP = redisTemplate.opsForValue().get(key);
+        boolean expired = (storedOTP == null);
+        
+        System.out.println("=== OTP EXPIRY CHECK ===");
+        System.out.println("Email: " + email);
+        System.out.println("Stored OTP: " + storedOTP);
+        System.out.println("Expired: " + expired);
+        
+        return expired;
+    }
+    
+    public void clearOTP(String email) {
+        String key = OTP_PREFIX + email;
+        redisTemplate.delete(key);
+        System.out.println("OTP cleared for: " + email);
+    }
+    
+    private String generateRandomOTP() {
+        Random random = new Random();
+        StringBuilder otp = new StringBuilder();
+        
+        for (int i = 0; i < otpLength; i++) {
+            otp.append(random.nextInt(10));
+        }
+        
+        return otp.toString();
+    }
+}

@@ -1,4 +1,5 @@
 #version: "3.8"
+# after cloning the backend application we need to move the docker compose file to the /opt/created-directory that created directory must have the frontend,docker-compose file and backend application in the same folder in /opt
 
 services:
   backend:

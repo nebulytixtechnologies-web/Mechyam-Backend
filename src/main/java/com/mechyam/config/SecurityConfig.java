@@ -29,6 +29,9 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+	    .headers(headers -> headers
+            .frameOptions(frame -> frame.sameOrigin())
+   	     )
             .authorizeHttpRequests(auth -> auth
                 // ✅ Allow preflight browser CORS OPTIONS requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

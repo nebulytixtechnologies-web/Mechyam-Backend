@@ -6,10 +6,14 @@ services:
     container_name: backend
     env_file: .env
     restart: always
+    ports:
+    - "8080:8080"
     depends_on:
       - redis
     networks:
       - app-net
+    volumes:
+      - ./Mechyam-Backend/uploads:/uploads
 
   frontend:
     build: ./frontend-mechyam

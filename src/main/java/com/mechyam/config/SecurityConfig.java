@@ -29,20 +29,24 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
+	    .headers(headers -> headers
+            .frameOptions(frame -> frame.sameOrigin())
+   	     )
             .authorizeHttpRequests(auth -> auth
                 // ✅ Allow preflight browser CORS OPTIONS requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // ✅ Allow all OTP/Auth endpoints
                 .requestMatchers(
-                        "/api/admin/auth/login",
-                        "/api/admin/auth/verify-otp",
-                        "/api/admin/auth/resend-otp",
-                        "/api/admin/auth/test"
+                        "/mechyam/api/admin/auth/login",
+                        "/mechyam/api/admin/auth/verify-otp",
+                        "/mechyam/api/admin/auth/resend-otp",
+                        "/mechyam/api/admin/auth/test",
+			"/mechyam/actuator/**"
                 ).permitAll()
 
                 // ✅ Protect admin dashboard after OTP
-                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/mechyam/api/admin/**").hasAuthority("ROLE_ADMIN")
 
                 // ✅ Allow everything else
                 .anyRequest().permitAll()
@@ -58,7 +62,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of(
+				"http://localhost:5173",
+				"https://localhost:5173",
+				"https://mechyam.com",
+				"https://www.mechyam.com"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("Authorization"));
@@ -70,9 +78,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+//    @Bean
+//  public PasswordEncoder passwordEncoder() {
+//      return new BCryptPasswordEncoder();
+//   }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

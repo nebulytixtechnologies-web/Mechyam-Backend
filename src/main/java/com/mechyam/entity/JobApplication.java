@@ -44,6 +44,9 @@ public class JobApplication {
     
     @Column(name = "RESUME_FILE_NAME")
     private String resumeFileName;
+
+    @Column(name = "resume_preview_path")
+    private String resumePreviewPath;
     
     @Column(name = "APPLICATION_DATE")
     private LocalDateTime applicationDate;
@@ -100,4 +103,12 @@ public class JobApplication {
     
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public String getResumePreviewPath() {
+        return resumePreviewPath;
+    }
+
+    public void setResumePreviewPath(String resumePreviewPath) {
+        this.resumePreviewPath = resumePreviewPath;
+    }
 } 

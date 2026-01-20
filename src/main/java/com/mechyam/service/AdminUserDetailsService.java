@@ -1,33 +1,46 @@
 package com.mechyam.service;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import com.mechyam.entity.Admin;
+import com.mechyam.repository.AdminRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 @Service
 public class AdminUserDetailsService implements UserDetailsService {
 
-    private final String adminEmail = "tejassoni910@gmail.com";
-    private final String adminPassword = "admin123";
+    private final AdminRepository adminRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public AdminUserDetailsService(
+            AdminRepository adminRepository,
+            BCryptPasswordEncoder passwordEncoder) {
+        this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        if (adminEmail.equals(email)) {
-            return new User(
-                adminEmail,
-                "{noop}" + adminPassword,
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")) // Must be ROLE_ADMIN
-            );
-        }
-        throw new UsernameNotFoundException("Admin user not found with email: " + email);
+    public UserDetails loadUserByUsername(String email)
+            throws UsernameNotFoundException {
+
+        Admin admin = adminRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Admin not found: " + email));
+
+        return User.builder()
+                .username(admin.getEmail())
+                .password(admin.getPassword()) // BCrypt hash from DB
+                .roles(admin.getRole())        // e.g. ADMIN
+                .build();
     }
 
-    public boolean validateAdminCredentials(String email, String password) {
-        return adminEmail.equals(email) && adminPassword.equals(password);
+    public boolean validateAdminCredentials(String email, String rawPassword) {
+        Admin admin = adminRepository.findByEmail(email).orElse(null);
+        return admin != null &&
+               passwordEncoder.matches(rawPassword, admin.getPassword());
     }
 }
+

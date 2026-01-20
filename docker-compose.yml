@@ -13,7 +13,7 @@ services:
     networks:
       - app-net
     volumes:
-      - ./Mechyam-Backend/uploads:/uploads
+      - ./uploads:/app/uploads
 
   frontend:
     build: ./frontend-mechyam

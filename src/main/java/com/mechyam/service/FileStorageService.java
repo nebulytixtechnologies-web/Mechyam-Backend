@@ -10,11 +10,12 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
+    // 🔥 MUST BE ABSOLUTE PATH
     private static final Path RESUME_DIR = Paths.get("/uploads/resumes");
 
     public String storeResume(MultipartFile file) throws IOException {
 
-        if (!"application/pdf".equalsIgnoreCase(file.getContentType())) {
+        if (!file.getContentType().equalsIgnoreCase("application/pdf")) {
             throw new RuntimeException("Only PDF resumes are supported");
         }
 
@@ -23,13 +24,9 @@ public class FileStorageService {
         String fileName = UUID.randomUUID() + ".pdf";
         Path targetPath = RESUME_DIR.resolve(fileName);
 
-        Files.copy(
-                file.getInputStream(),
-                targetPath,
-                StandardCopyOption.REPLACE_EXISTING
-        );
+        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-        return fileName; // store ONLY filename in DB
+        return fileName;
     }
 
     public Path loadResume(String fileName) {

@@ -28,5 +28,8 @@ cloudinary:
   cloud-name: test-cloud
   api-key: test-key
   api-secret: test-secret
+jwt:
+  secret: test-jwt-secret-for-ci
+  expiration: 3600000
 
 

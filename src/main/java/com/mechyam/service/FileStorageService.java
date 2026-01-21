@@ -32,5 +32,9 @@ public class FileStorageService {
     public Path loadResume(String fileName) {
         return RESUME_DIR.resolve(fileName).normalize();
     }
+
+    public Path loadFile(String fileName) {
+        return loadResume(fileName);
+    }
 }
 

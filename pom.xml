@@ -133,7 +133,16 @@
                 <dependency>
                         <groupId>org.springframework.security</groupId>
                         <artifactId>spring-security-crypto</artifactId>
-                </dependency>
+		</dependency>
+
+                <!-- H2 database for tests -->
+		<dependency>
+		    <groupId>com.h2database</groupId>
+		    <artifactId>h2</artifactId>
+		    <scope>test</scope>
+		</dependency>
+
+
 
 	</dependencies>
 

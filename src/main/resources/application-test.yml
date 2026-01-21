@@ -24,4 +24,9 @@ logging:
     root: INFO
     org.hibernate.SQL: OFF
     org.hibernate.tool.schema: OFF
+cloudinary:
+  cloud-name: test-cloud
+  api-key: test-key
+  api-secret: test-secret
+
 

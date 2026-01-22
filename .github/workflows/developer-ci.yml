@@ -41,6 +41,7 @@ jobs:
             -Dsonar.organization=naveenanavya \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.branch.name=developer \
+            -Dsonar.branch.target=developer \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: Build application (skip tests)

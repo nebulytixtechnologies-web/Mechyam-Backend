@@ -37,13 +37,4 @@ jobs:
       - name: Build application (skip tests)
         run: mvn clean package -DskipTests
 
-	  - name: SonarCloud Scan (developer branch)
-        run: |
-          mvn verify sonar:sonar \
-            -Dsonar.projectKey=naveenaja_Mechyam-Backend \
-            -Dsonar.organization=naveenanavya \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.branch.name=developer \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
 

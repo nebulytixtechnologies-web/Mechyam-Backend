@@ -10,7 +10,7 @@ on:
 
 jobs:
   test-build:
-    name: Maven Test & Build
+    name: Maven Test, Sonar & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,15 @@ jobs:
       - name: Run tests
         run: mvn clean test
 
+      - name: SonarCloud Scan (developer branch)
+        run: |
+          mvn verify sonar:sonar \
+            -Dsonar.projectKey=naveenaja_Mechyam-Backend \
+            -Dsonar.organization=naveenanavya \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.branch.name=developer \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
       - name: Build application (skip tests)
         run: mvn clean package -DskipTests
-
 

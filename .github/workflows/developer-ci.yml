@@ -10,12 +10,14 @@ on:
 
 jobs:
   test-build:
-    name: Maven Test, Sonar & Build
+    name: Maven Test, Sonar, Build & Docker
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -47,15 +49,16 @@ jobs:
       - name: Build application (skip tests)
         run: mvn clean package -DskipTests
 
-      - name: Build Docker image (developer)
-        run: docker build -t mechyam-backend:dev .
-
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
           name: mechyam-backend-jar
           path: target/*.jar
-            - name: Login to DockerHub
+
+      - name: Build Docker image (developer)
+        run: docker build -t mechyam-backend:dev .
+
+      - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -65,5 +68,4 @@ jobs:
         run: |
           docker tag mechyam-backend:dev ${{ secrets.DOCKER_USERNAME }}/mechyam-backend:dev
           docker push ${{ secrets.DOCKER_USERNAME }}/mechyam-backend:dev
-
 

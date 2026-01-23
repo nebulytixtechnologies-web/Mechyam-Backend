@@ -1,0 +1,28 @@
+name: Backend CD - Developer Branch
+
+on:
+  workflow_run:
+    workflows: ["Backend CI - Developer Branch"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    name: Deploy to EC2 (Docker Compose)
+    runs-on: self-hosted
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Pull latest Docker image
+        run: docker pull naveena106/mechyam-backend:dev
+
+      - name: Deploy using Docker Compose
+        run: |
+          cd /opt/mechyam/app
+          docker compose down --remove-orphans
+          docker compose up -d
+
+      - name: Verify containers
+        run: docker ps
+
